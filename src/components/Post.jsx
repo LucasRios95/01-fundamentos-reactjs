@@ -1,50 +1,73 @@
-import styles from './Post.module.css'
-import { Comment } from './Comment'
-import { Avatar } from './Avatar'
+import { format, formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale/pt-BR";
 
-export function Post() {
-    return (
-        <article className={styles.post}>
-            <header>
-                <div className={styles.author}>
-                    <Avatar hasBorder={true} src="https://github.com/maykbrito.png" />
-                    <div className={styles.authorInfo}>
-                        <strong>Lucas Rios</strong>
-                        <span>Backend Developer</span>
-                    </div>
-                </div>
-                <time title='29 de maio às 11:44' dateTime="2024-05-29 11:44:13">Publicado há 1h</time>
-            </header>
+import { Avatar } from "./Avatar";
+import { Comment } from "./Comment";
 
-            <div className={styles.content}>
-                <p>Fala galeraa 👋</p>
-                <p>Acabei de subir mais um projeto no meu portifa. É um projeto que fiz no NLW Return, evento da Rocketseat. O nome do projeto é DoctorCare 🚀
-                </p>
-                <p><a href="http://">👉 jane.design/doctorcare</a></p>
-                <p>
-                    <a href="http://">#novoprojeto </a>
-                    <a href="http://">#nlw </a>
-                    <a href="http://">#rocketseat</a>
-                </p> 
-            </div>
+import styles from "./Post.module.css";
 
-                <form className={styles.commentForm}>
-                    <strong>Deixe seu feedback</strong>
+export function Post({ author, publishedAt, content }) {
+  const publishedDateFormatted = format(
+    publishedAt,
+    "d 'de' LLLL 'às' HH:mm'h'",
+    {
+      locale: ptBR,
+    }
+  );
 
-                    <textarea
-                        placeholder="Deixe um comentário"
-                    />
+  const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
+    locale: ptBR,
+    addSuffix: true,
+  });
 
-                    <footer>
-                        <button type="submit">Comentar</button>
-                    </footer>
-                </form>
+  return (
+    <article className={styles.post}>
+      <header>
+        <div className={styles.author}>
+          <Avatar hasBorder={true} src={author.avatarUrl} />
+          <div className={styles.authorInfo}>
+            <strong>{author.name}</strong>
+            <span>{author.role}</span>
+          </div>
+        </div>
 
-                <div className={styles.commentList}>
-                    <Comment />
-                    <Comment />
-                    <Comment />
-                </div>
-        </article>
-    )
+        <time
+          title={publishedDateFormatted}
+          dateTime={publishedAt.toISOString()}
+        >
+          {publishedDateRelativeToNow}
+        </time>
+      </header>
+
+      <div className={styles.content}>
+        {content.map((line) => {
+          if (line.type === "paragraph") {
+            return <p>{line.content}</p>;
+          } else if (line.type === "link") {
+            return (
+              <p>
+                <a href="#">{line.content}</a>
+              </p>
+            );
+          }
+        })}
+      </div>
+
+      <form className={styles.commentForm}>
+        <strong>Deixe seu feedback</strong>
+
+        <textarea placeholder="Deixe um comentário" />
+
+        <footer>
+          <button type="submit">Comentar</button>
+        </footer>
+      </form>
+
+      <div className={styles.commentList}>
+        <Comment />
+        <Comment />
+        <Comment />
+      </div>
+    </article>
+  );
 }
